@@ -3,6 +3,7 @@ import argparse
 import logging
 import time
 import numpy as np
+from tqdm import tqdm
 
 import torch
 import torchvision.transforms as transforms
@@ -14,7 +15,8 @@ from src.cnn import *
 from src.eval.evaluate import eval_fn, accuracy
 from src.training import train_fn
 from src.data_augmentations import *
-
+from src.plotting import plot_accuracy, plot_loss, plot_lr
+from src.utils import eval_loss
 
 def main(data_dir,
          torch_model,
@@ -47,7 +49,7 @@ def main(data_dir,
 
     # Device configuration
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-
+    # print(data_augmentations)
     if data_augmentations is None:
         data_augmentations = transforms.ToTensor()
     elif isinstance(data_augmentations, list):
@@ -59,6 +61,13 @@ def main(data_dir,
     train_data = ImageFolder(os.path.join(data_dir, 'train'), transform=data_augmentations)
     val_data = ImageFolder(os.path.join(data_dir, 'val'), transform=data_augmentations)
     test_data = ImageFolder(os.path.join(data_dir, 'test'), transform=data_augmentations)
+    # random_loader = DataLoader(dataset=ConcatDataset([train_data]),
+    #                                 batch_size=1,
+    #                                 shuffle=True)
+    # images = [transforms.ToPILImage()(next(iter(random_loader))[0]).convert('RGB') for i in range(17)]
+    # orig, _ = train_data[-1]
+    # print(orig)
+    # plot_images(images)
 
     channels, img_height, img_width = train_data[0][0].shape
 
@@ -94,18 +103,50 @@ def main(data_dir,
     summary(model, input_shape,
             device='cuda' if torch.cuda.is_available() else 'cpu')
 
+    train_scores = []
+    train_losses = []
+    test_losses = []
+
+    learning_rates = []
+    t = 0
+    cycles = 5
+    cycle_len = 1
+    epoch_n = 120
+    scheduler = None
+    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, int(num_epochs/5), eta_min=1.0e-6)
+    # scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=learning_rate, max_lr=learning_rate*10,
+    #                                               step_size_down=2000, verbose=True)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, cycle_len, T_mult=2)
+    # scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=0.01,
+    #                                                 steps_per_epoch=len(train_loader), epochs=num_epochs)
+    # print(type(scheduler).__name__)
+    # scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.2, verbose=True, last_epoch=num_epochs*8)
     # Train the model
     for epoch in range(num_epochs):
         logging.info('#' * 50)
         logging.info('Epoch [{}/{}]'.format(epoch + 1, num_epochs))
 
-        train_score, train_loss = train_fn(model, optimizer, train_criterion, train_loader, device)
+        train_score, train_loss = train_fn(model, optimizer, train_criterion, train_loader,
+                                           device, scheduler, epoch, learning_rates)
         logging.info('Train accuracy: %f', train_score)
+        train_scores.append(train_score)
+        train_losses.append(train_loss)
+        if scheduler and type(scheduler).__name__ != "OneCycleLR" and type(scheduler).__name__ != 'CyclicLR':
+            scheduler.step(epoch + t)
+            learning_rates.append(scheduler.get_last_lr())
+            print(f'Last Learning rate - {learning_rates[-1]}')
 
+        # if (epoch + 1) % epoch_n == 0 and type(scheduler).__name__ == 'CosineAnnealingWarmRestarts':
+        #     scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, 60, T_mult=1)
+        #     t += 1
+        #     cycle_len = cycle_len - 1
+        #     epoch_n += cycle_len
         if not use_all_data_to_train:
-            test_score = eval_fn(model, val_loader, device)
+            # test_score = eval_fn(model, val_loader, device)
+            test_score, test_loss = eval_loss(model, val_loader, train_criterion, device)
             logging.info('Validation accuracy: %f', test_score)
             score.append(test_score)
+            test_losses.append(test_loss)
 
     if save_model_str:
         # Save the model checkpoint can be restored via "model = torch.load(save_model_str)"
@@ -113,9 +154,18 @@ def main(data_dir,
 
         if not os.path.exists(model_save_dir):
             os.mkdir(model_save_dir)
-
-        save_model_str = os.path.join(model_save_dir, exp_name + '_model_' + str(int(time.time())))
+        model_id = str(int(time.time()))
+        save_model_str = os.path.join(model_save_dir, exp_name + '_model_' + model_id)
         torch.save(model.state_dict(), save_model_str)
+        plot_accuracy(train_scores, score, save=True, model=torch_model.__name__,
+                      opt=model_optimizer.__name__, scheduler=type(scheduler).__name__,
+                      lr=learning_rate, model_id=model_id)
+        plot_loss(train_losses, test_losses, save=True, model=torch_model.__name__,
+                  opt=model_optimizer.__name__, scheduler=type(scheduler).__name__,
+                  lr=learning_rate, model_id=model_id)
+        plot_lr(learning_rates, save=True, model=torch_model.__name__,
+                  opt=model_optimizer.__name__, scheduler=type(scheduler).__name__,
+                  lr=learning_rate, model_id=model_id)
 
     if not use_all_data_to_train:
         logging.info('Accuracy at each epoch: ' + str(score))

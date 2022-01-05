@@ -1,2 +1,10 @@
+# Ignore plots and models since tey are many
 /plots
 /models
+/src/models
+/src/plots
+
+# ignore pycache files
+/src/*/*.pyc
+/*/__pycache__
+*/__pycache__

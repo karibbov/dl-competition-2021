@@ -4,7 +4,7 @@ import time
 from src.eval.evaluate import AverageMeter, accuracy
 
 
-def train_fn(model, optimizer, criterion, loader, device):
+def train_fn(model, optimizer, criterion, loader, device, scheduler = None, epoch = 0, learning_rates = []):
     """
   Training method
   :param model: model to train
@@ -20,8 +20,10 @@ def train_fn(model, optimizer, criterion, loader, device):
     model.train()
     time_train = 0
 
+    iter = len(loader)
     t = tqdm(loader)
-    for images, labels in t:
+    # learning_rates = []
+    for i, (images, labels) in enumerate(t):
         images = images.to(device)
         labels = labels.to(device)
 
@@ -30,6 +32,13 @@ def train_fn(model, optimizer, criterion, loader, device):
         loss = criterion(logits, labels)
         loss.backward()
         optimizer.step()
+        if type(scheduler).__name__ == 'OneCycleLR' or type(scheduler).__name__ == 'CyclicLR':
+            scheduler.step()
+            learning_rates.append(scheduler.get_last_lr())
+
+        if type(scheduler).__name__ == 'CosineAnnealingWarmRestarts':
+            scheduler.step(epoch + i / iter)
+            # print('OneCycle')
 
         acc = accuracy(logits, labels)
         n = images.size(0)
