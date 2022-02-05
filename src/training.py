@@ -1,10 +1,13 @@
 from tqdm import tqdm
 import time
+import torch
+import torch.nn.functional as F
+import numpy as np
 
 from src.eval.evaluate import AverageMeter, accuracy
 
 
-def train_fn(model, optimizer, criterion, loader, device, scheduler = None, epoch = 0, learning_rates = []):
+def train_fn(model, optimizer, criterion, loader, device, scheduler = None, epoch = 0, learning_rates = [], SSL=False):
     """
   Training method
   :param model: model to train
@@ -24,11 +27,32 @@ def train_fn(model, optimizer, criterion, loader, device, scheduler = None, epoc
     t = tqdm(loader)
     # learning_rates = []
     for i, (images, labels) in enumerate(t):
+        # print(images.size())
+
+        # for j in range(images.size()[0]):
+
+        if SSL:
+            block_size = int(images.size()[-1]/2)
+            block_locs = np.random.random_integers(low=0, high=images.size()[-1] - block_size, size=2*images.size()[0])
+            # set a square of size (block_size, block_size) to zeros
+            transform_tensors = torch.cat([F.pad(torch.zeros((1, 3, block_size, block_size)),
+                                           (block_locs[j], images.size()[-1] - block_size - block_locs[j],
+                                           block_locs[j+images.size()[0]],
+                                           images.size()[-1] - block_size - block_locs[j+images.size()[0]]),
+                                                 "constant", 1)
+                                           for j in range(images.size()[0])])
+            labels = images
+            images = images*transform_tensors
+        # else:
+        #     labels = F.one_hot(labels, num_classes=model.fc2.out_features).float()
         images = images.to(device)
+        # print()
         labels = labels.to(device)
 
         optimizer.zero_grad()
         logits = model(images)
+        # print(logits.size())
+        # print(labels.size())
         loss = criterion(logits, labels)
         loss.backward()
         optimizer.step()
@@ -38,12 +62,13 @@ def train_fn(model, optimizer, criterion, loader, device, scheduler = None, epoc
 
         if type(scheduler).__name__ == 'CosineAnnealingWarmRestarts':
             scheduler.step(epoch + i / iter)
-            # print('OneCycle')
+            # print('SGDR')
 
-        acc = accuracy(logits, labels)
         n = images.size(0)
+        if not SSL:
+            acc = accuracy(logits, labels)
+            score.update(acc.item(), n)
         losses.update(loss.item(), n)
-        score.update(acc.item(), n)
 
         t.set_description('(=> Training) Loss: {:.4f}'.format(losses.avg))
 
