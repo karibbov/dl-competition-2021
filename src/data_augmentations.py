@@ -4,7 +4,7 @@ from torchvision import transforms
 from src.plotting import plot_images
 from src.utils import SSLTransform
 
-size = (64, 64)
+size = (128, 128)
 
 # computed these with scratch code for 128x128 images
 MEAN = [0.4197, 0.4253, 0.2974]

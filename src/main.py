@@ -125,7 +125,7 @@ def main(data_dir,
         load_model_str = os.path.join(model_load_dir, load_model_str)
         args_dict.update({'load_model_str': load_model_str})
 
-    model = torch_model(**args_dict)
+    model = torch_model(**args_dict).to(device)
     # instantiate optimizer
 
     optimizer = model_optimizer(model.parameters(), lr=learning_rate)
@@ -156,7 +156,8 @@ def main(data_dir,
         cycle_len = other_params.get('cycle_len', None)
         T_mult = other_params.get('T_mult', None)
         T = other_params.get('T', None)
-        T = num_epochs if int(num_epochs/T) < 1 else T
+        if T:
+            T = num_epochs if int(num_epochs/T) < 1 else T
         eta_min = other_params.get('eta_min', None)
         if eta_min and eta_min > learning_rate:
             eta_min = learning_rate - learning_rate/100

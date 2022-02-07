@@ -38,11 +38,11 @@ def run_pipeline():
          torch_model=USkipModel, num_epochs=1022, batch_size=64, learning_rate=2.223e-3,
          train_criterion=torch.nn.MSELoss, model_optimizer=torch.optim.Adam, scheduler_key='SGDR',
          data_augmentations=compose, save_model_str='models/', load_model_str=None, use_all_data_to_train=False,
-         exp_name='SSL_Test', config=None, training_type='SSL')
+         exp_name='SSL_Pretrain', config=None, training_type='SSL')
     # minimum budget that BOHB uses
     min_budget = 3
     # largest budget BOHB will use
-    max_budget = 511
+    max_budget = 510
     working_dir = os.curdir
     host = "localhost"
     port = 0
@@ -69,7 +69,7 @@ def run_pipeline():
          train_criterion=loss_dict[best_hypers['criterion']], model_optimizer=opt_dict[best_hypers['optimizer']],
          scheduler_key=best_hypers['scheduler'],
          data_augmentations=eval(best_hypers['data_augments']), save_model_str='models/', load_model_str=get_saved_filename(),
-         use_all_data_to_train=True, exp_name='final_train', config=None, training_type='default')
+         use_all_data_to_train=True, exp_name='Final_Train', config=None, training_type='default')
 
 
 
