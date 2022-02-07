@@ -81,8 +81,7 @@ def run_pipeline(h='default', ssl='default'):
         best_params = {}
         for h_params in [sgdr_c_hp, sgdr_n_hp, cos3_hp]:
             best_hypers = h_params
-            print(f"Checking PARAMS: {best_hypers}")
-
+            print('Candidate:', best_hypers)
             result = main(data_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dataset'),
                          torch_model=TransferSkipModel, num_epochs=1022, batch_size=64, learning_rate=best_hypers['lr'],
                          train_criterion=loss_dict[best_hypers['criterion']], model_optimizer=opt_dict[best_hypers['optimizer']],
@@ -93,8 +92,8 @@ def run_pipeline(h='default', ssl='default'):
                 best_params = best_hypers
                 val_acc = result[-1]
 
-            print(f"BEST PARAMS: {best_params}")
-            print(f"val_acc: {result[-1]}, val_loss: {result[-2]}, train_acc: {result[-3]}, train_loss: {result[0]}")
+            print('BEST PARAMS: ', best_params)
+            print('val_acc: ',result[-1], 'val_loss: ', result[-2], 'train_acc: ', result[-3], 'train_loss: ', result[0])
 
         best_hypers = best_params
     main(data_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dataset'),
