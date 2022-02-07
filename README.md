@@ -1,5 +1,5 @@
 # README
-
+Samir Garibov
 ## To whomever reading the code - I'm sorry for all the spaghetti code.
 
 The main models used during training are: 
