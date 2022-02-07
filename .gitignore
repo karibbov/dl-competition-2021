@@ -1,6 +1,6 @@
 # Ignore plots and models since tey are many
 /plots
-/models
+#/models
 /src/models
 /src/plots
 

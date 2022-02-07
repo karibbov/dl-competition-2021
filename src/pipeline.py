@@ -50,7 +50,7 @@ def run_pipeline(h='default', ssl='default'):
         host = "localhost"
         port = 0
         run_id = 'bohb_run_1'
-        n_bohb_iterations = 22
+        n_bohb_iterations = 5#22
         res = run_bohb(
                     host,
                     port,

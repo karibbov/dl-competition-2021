@@ -13,12 +13,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser('DL WS20/21 Competition')
 
     parser.add_argument('-m', '--model',
-                        default='SampleModel',
+                        default='SkipModel',
                         help='Name of the Model class present in cnn.py (Eg: SampleModel)',
                         type=str)
 
     parser.add_argument('-p', '--saved-model-file',
-                        default='sample_model',
+                        default='Final_Train_model',
                         help='Name of file inside models directory which contains the saved weights of the trained '
                              'model',
                         type=str)
@@ -30,7 +30,7 @@ if __name__ == '__main__':
                         )
 
     parser.add_argument('-d', '--data-augmentations',
-                        default='resize_to_64x64',
+                        default='compose',
                         help='Data augmentation to apply to data before passing it to the model. '
                         + 'Must be available in data_augmentations.py')
 

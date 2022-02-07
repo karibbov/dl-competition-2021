@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from math import ceil
+import os
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -190,7 +191,7 @@ class SkipModel(nn.Module):
     A sample PyTorch CNN model
     """
 
-    def __init__(self, input_shape=(3, 64, 64), num_classes=10):
+    def __init__(self, input_shape=(3, 128, 128), num_classes=10):
         super(SkipModel, self).__init__()
         self.bn_momentum = 0.2
 
@@ -208,7 +209,6 @@ class SkipModel(nn.Module):
         self.conv3 = nn.Conv2d(in_channels=20, out_channels=60, kernel_size=(5, 5), padding=(2, 2), dilation=(2, 2))
         dims, _ = calculate_dims(dims, 60, (5, 5), (2, 2), 1, (2, 2))
         dims, _ = calculate_dims(dims, dims[0], (2, 2), (0, 0), 2)
-
 
 
         self.conv5 = nn.Conv2d(in_channels=60, out_channels=20, kernel_size=(3, 3), padding=(1, 1))
@@ -251,6 +251,8 @@ class SkipModel(nn.Module):
         self.dropout = nn.Dropout(0.2)
         self.fc2 = nn.Linear(in_features=16, out_features=num_classes)
 
+
+
     def forward(self, x):
         x_skip1 = self.downsample1(x)
         x = self.conv1(x)
@@ -289,8 +291,7 @@ class SkipModel(nn.Module):
         x = F.relu(x)
         x = self.pool(x)
         x = x + pad3d_to(x_skip3, x.size())
-        # print(x_skip3.size())
-        # print(x.size())
+
         x = x.view(x.size(0), -1)
         x = self.fc1(x)
         x = self.dropout(x)
@@ -468,7 +469,7 @@ class TransferSkipModel(nn.Module):
     A sample PyTorch CNN model
     """
 
-    def __init__(self, load_model_str, input_shape=(10, 12, 12), num_classes=10):
+    def __init__(self, load_model_str, input_shape=(3, 128, 128), num_classes=10):
         super(TransferSkipModel, self).__init__()
         umodel = USkipModel(input_shape=input_shape)
         umodel.load_state_dict(torch.load(load_model_str, map_location=torch.device(device)))
