@@ -158,6 +158,7 @@ def main(data_dir,
         T = other_params.get('T', None)
         if T:
             T = num_epochs if int(num_epochs/T) < 1 else T
+            # print(int(num_epochs/T))
         eta_min = other_params.get('eta_min', None)
         if eta_min and eta_min > learning_rate:
             eta_min = learning_rate - learning_rate/100
@@ -326,7 +327,7 @@ if __name__ == '__main__':
         learning_rate=args.learning_rate,
         train_criterion=loss_dict[args.training_loss],
         model_optimizer=opti_dict[args.optimizer],
-        scheduler=scheduler_dict[args.scheduler],
+        scheduler_key=args.scheduler,
         data_augmentations=eval(args.data_augmentation),  # Check data_augmentations.py for sample augmentations
         save_model_str=args.model_path,
         exp_name=args.exp_name,
