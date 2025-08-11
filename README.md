@@ -1,3 +1,20 @@
+# Old Lost and Found Projects
+
+This is a deep learning competition project from Fall 2021.
+It includes:
+- Code for supervised and contrastive-loss based self-supervised CNN training
+- Multiple architectures: ResNet, U-Net, and custom CNNs
+- A variety of data augmentation techniques
+- Hyperparameter optimization for:
+    - Optimizer choice
+    - Learning rate schedule
+    - CNN architecture
+    - Data augmentation
+    - Loss function
+
+The model was **only** trained on the data present in this repository and performed on par with transfer learning from pre-trained resnet models on the held-out dataset. 
+The rest of this repository has not been modified in the last 3 years. 
+
 # README
 Samir Garibov
 ## To whomever reading the code - I'm sorry for all the spaghetti code.
