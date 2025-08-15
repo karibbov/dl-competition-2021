@@ -5,7 +5,7 @@ It includes:
 - Code for supervised and contrastive-loss based self-supervised CNN training
 - Multiple architectures: ResNet, U-Net, and custom CNNs
 - A variety of data augmentation techniques
-- Hyperparameter optimization for:
+- Hyperparameter optimization (BOHB) for:
     - Optimizer choice
     - Learning rate schedule
     - CNN architecture
