@@ -1,4 +1,4 @@
-# CV model training with Auto-ML
+# Computer Vision model training with Auto-ML
 
 This is a deep learning competition project from Fall 2021.
 It includes:
