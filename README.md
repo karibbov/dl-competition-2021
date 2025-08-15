@@ -1,6 +1,6 @@
 # Computer Vision model training with Auto-ML
 
-This is a deep learning competition project from Fall 2021.
+This was a deep learning [competition](https://ml.informatik.uni-freiburg.de/teaching/ws2021/foundations-of-deep-learning/#colophon) submission in Fall 2021.
 It includes:
 - Code for supervised and contrastive-loss based self-supervised CNN training
 - Multiple architectures: ResNet, U-Net, and custom CNNs
@@ -12,7 +12,7 @@ It includes:
     - Data augmentation
     - Loss function
 
-The model was **only** trained on the data present in this repository and performed on par with transfer learning from pre-trained resnet models on the held-out dataset. 
+The model was **only** trained on the data present in this repository and performed on par with transfer learning from pre-trained resnet models on the held-out dataset, achieving third place. 
 The rest of this repository has not been modified in the last 3 years. 
 
 # README
