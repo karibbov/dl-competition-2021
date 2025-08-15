@@ -16,8 +16,7 @@ The model was **only** trained on the data present in this repository and perfor
 The rest of this repository has not been modified in the last 3 years. 
 
 # README
-Samir Garibov
-## To whomever reading the code - I'm sorry for all the spaghetti code.
+Samir Garibov.
 
 The main models used during training are: 
 
